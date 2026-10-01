@@ -28,7 +28,8 @@ export default class NudgePlugin extends Plugin {
       () => this.trashCompletedTasks(),
       () => this.openInbox(),
       (item) => this.completeTask(item),
-      () => ({ ...this.settings.completionHistory })
+      () => ({ ...this.settings.completionHistory }),
+      () => this.settings.timeFormat
     )
 );
 
