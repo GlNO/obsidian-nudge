@@ -155,13 +155,16 @@ export default class NudgePlugin extends Plugin {
     if (!(inbox instanceof TFile)) return;
 
     const text = await this.app.vault.cachedRead(inbox);
-    if (text.includes("| Task | Due | Time | Completed |")) return;
+    const normalized = this.normalizeInboxText(text, inbox.path);
+    if (normalized !== text) await this.app.vault.modify(inbox, normalized);
+  }
 
+  private normalizeInboxText(text: string, filePath: string): string {
     const items = text
       .split(/\r?\n/)
-      .map((line, index) => parseLine(line, inbox.path, index))
+      .map((line, index) => parseLine(line, filePath, index))
       .filter((item): item is AgendaItem => item !== null);
-    if (items.length === 0) return;
+    if (items.length === 0) return text;
 
     const row = (item: AgendaItem) =>
       `| ${item.title.replace(/\|/g, "\\|")} | ${item.date} | ${item.time ?? ""} | ${item.completedOn ?? ""} |`;
@@ -177,7 +180,7 @@ export default class NudgePlugin extends Plugin {
     if (completed.length > 0) {
       lines.push("", "---", "", "## Completed", "", "| Task | Due | Time | Completed |", "| --- | --- | --- | --- |", ...completed.map(row));
     }
-    await this.app.vault.modify(inbox, `${lines.join("\n")}\n`);
+    return `${lines.join("\n")}\n`;
   }
 
   private async completeTask(item: AgendaItem) {
@@ -224,6 +227,15 @@ export default class NudgePlugin extends Plugin {
     return `${beforeCompleted}${beforeCompleted.endsWith("\n") ? "" : "\n"}${row}\n${text.slice(completedStart)}`;
   }
 
+  private hasTaskTable(text: string): boolean {
+    const hasTaskHeader = text.split(/\r?\n/).some((line) => {
+      const cells = line.split("|").map((cell) => cell.trim()).filter(Boolean);
+      return cells.length === 4 && cells[0] === "Task" && cells[1] === "Due" && cells[2] === "Time" && cells[3] === "Completed";
+    });
+    const hasMarkdownTable = /^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$/m.test(text);
+    return hasTaskHeader || hasMarkdownTable;
+  }
+
   async addTask(title: string, date: string, time?: string) {
     return this.enqueueVaultWrite(async () => {
       const path = normalizePath(this.settings.inboxPath);
@@ -240,13 +252,17 @@ export default class NudgePlugin extends Plugin {
 
       if (existing instanceof TFile) {
         file = existing;
-        await this.app.vault.process(file, (data) =>
-          data.trim() === ""
-            ? `# Tasks\n\n| Task | Due | Time | Completed |\n| --- | --- | --- | --- |\n${line}\n`
-            : data.includes("| Task | Due | Time | Completed |")
-              ? this.appendActiveRow(data, line)
-              : `${data.endsWith("\n") ? data : `${data}\n`}\n# Tasks\n\n| Task | Due | Time | Completed |\n| --- | --- | --- | --- |\n${line}\n`
-        );
+        await this.app.vault.process(file, (data) => {
+          if (data.trim() === "") {
+            return `# Tasks\n\n| Task | Due | Time | Completed |\n| --- | --- | --- | --- |\n${line}\n`;
+          }
+
+          const normalized = this.normalizeInboxText(data, file.path);
+          if (normalized !== data) return this.appendActiveRow(normalized, line);
+          return this.hasTaskTable(data)
+            ? this.appendActiveRow(data, line)
+            : `${data.endsWith("\n") ? data : `${data}\n`}\n# Tasks\n\n| Task | Due | Time | Completed |\n| --- | --- | --- | --- |\n${line}\n`;
+        });
       } else {
         file = await this.app.vault.create(
           path,
