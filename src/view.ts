@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, TFile, Notice, moment, setIcon } from "obsidian";
+import { ItemView, WorkspaceLeaf, Notice, moment, setIcon } from "obsidian";
 import { AgendaItem } from "./types";
 
 export const VIEW_TYPE_NUDGE = "nudge-agenda-view";
@@ -253,7 +253,6 @@ export class NudgeView extends ItemView {
       for (const item of list) {
         const row = group.createDiv({ cls: "nudge-item" });
         if (item.done) row.addClass("is-completed");
-        row.setAttr("title", item.filePath);
 
         const check = row.createEl("button", {
           cls: "nudge-check",
@@ -278,7 +277,6 @@ export class NudgeView extends ItemView {
         if (name === "Overdue") chip.addClass("is-overdue");
         if (name === "Today") chip.addClass("is-today");
 
-        row.addEventListener("click", () => { void this.openItem(item); });
       }
     }
 
@@ -377,17 +375,7 @@ export class NudgeView extends ItemView {
 
   // ---------- actions ----------
 
-  private async openItem(item: AgendaItem) {
-    const file = this.app.vault.getAbstractFileByPath(item.filePath);
-    if (!(file instanceof TFile)) return;
-    const leaf = this.app.workspace.getLeaf(false);
-    await leaf.openFile(file, { eState: { line: item.line } });
-  }
-
   private async completeItem(item: AgendaItem) {
-    const file = this.app.vault.getAbstractFileByPath(item.filePath);
-    if (!(file instanceof TFile)) return;
-
     const today = moment().format(FMT);
     const completed = await this.complete(item);
     if (!completed) {
