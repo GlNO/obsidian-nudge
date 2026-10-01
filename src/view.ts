@@ -42,6 +42,12 @@ export class NudgeView extends ItemView {
 
   private render(animate = false) {
     const el = this.contentEl;
+    const activeInput = document.activeElement as HTMLInputElement | null;
+    const activeInputClass = activeInput?.classList.contains("nudge-add-title")
+      ? "nudge-add-title"
+      : null;
+    const selectionStart = activeInput?.selectionStart ?? null;
+    const selectionEnd = activeInput?.selectionEnd ?? null;
     el.empty();
     el.addClass("nudge-view");
 
@@ -57,6 +63,14 @@ export class NudgeView extends ItemView {
     this.renderAddForm(agenda);
     this.renderAgenda(agenda);
     this.renderHeatmap(activity);
+
+    if (activeInputClass) {
+      const restoredInput = el.querySelector<HTMLInputElement>(`.${activeInputClass}`);
+      restoredInput?.focus();
+      if (selectionStart !== null && selectionEnd !== null) {
+        restoredInput?.setSelectionRange(selectionStart, selectionEnd);
+      }
+    }
   }
 
   // ---------- top bar ----------
