@@ -1,6 +1,7 @@
 # Nudge
 
-Nudge is a focused task agenda for Obsidian. It collects dated tasks from your vault, organizes them by urgency, provides reminders, and stores everything locally in Markdown.
+Nudge is a focused task agenda for Obsidian. It collects dated tasks from your vault, organizes them by urgency, provides reminders, and stores everything locally in Markdown. 
+
 
 ## Features
 
@@ -20,38 +21,42 @@ Nudge is a focused task agenda for Obsidian. It collects dated tasks from your v
 
 Nudge recognizes Markdown checklist items containing a due-date token:
 
-```markdown
+```
 - [ ] Review project notes @2026-10-05
 - [ ] Team meeting @2026-10-06 14:30
+```
 
 A task may also be marked complete with a completion date:
+```
 - [x] Review project notes @2026-10-05 done:2026-10-04
+```
 
 Inbox format
 Tasks created from the Nudge agenda are saved in the configured inbox note as a Markdown table:
 
 # Tasks
-
+```
 | Task | Due | Time | Completed |
 | --- | --- | --- | --- |
 | Review project notes | 2026-10-05 |  |  |
 | Team meeting | 2026-10-06 | 14:30 |  |
 
-Completed tasks are moved to a separate Completed section.
+```
 
+Completed tasks are moved to a separate Completed section.
 Existing inbox tasks are migrated to this table format automatically when required.
 
-Getting started
-Install and enable Nudge.
-Open the command palette and run Open Nudge agenda, or click the Nudge calendar icon in the ribbon.
-Enter a task title.
-Select a due date and optional time.
-Select the plus button or press Enter.
-Tasks from other Markdown notes are included automatically when they use the supported checklist syntax.
+## Getting started
+1. Install and enable Nudge.
+2. Open the command palette and run Open Nudge agenda, or click the Nudge calendar icon in the ribbon.
+3. Enter a task title.
+4. Select a due date and optional time.
+5. Select the plus button or press Enter.
+6. Tasks from other Markdown notes are included automatically when they use the supported checklist syntax.
 
 Tasks from other Markdown notes are included automatically when they use the supported checklist syntax.
 
-Commands
+## Commands
 Open Nudge agenda: Open the Nudge agenda view.
 Scan vault for agenda items: Scan the vault and log the number of recognized tasks.
 Settings
@@ -63,35 +68,59 @@ All-day reminder time: The time used for tasks without a specific time.
 Inbox note: The Markdown note where tasks added from the agenda are saved.
 The default inbox note is Nudge_Inbox.md.
 
-Completing tasks
+### Completing tasks
 Select the check button beside an active task to complete it.
 
 Tasks from other notes are copied to the inbox's completed section and removed from their original location. Tasks already stored in the inbox are moved to its completed section.
 
 Completed tasks can be expanded from the agenda. The trash button permanently removes completed tasks from their notes.
 
-Installation
-Community plugins
-Open Settings → Community plugins.
-Search for Nudge.
-Install and enable the plugin.
-Manual installation
-Download main.js, manifest.json, and styles.css from the latest release.
+### Installation
+* Community plugins
+* Open Settings → Community plugins.
+* Search for Nudge.
+* Install and enable the plugin.
+* Manual installation
+* Download main.js, manifest.json, and styles.css from the latest release.
 
 Create this folder in your vault:
-
+```
 .obsidian/plugins/obsidian-nudge/
-
-Copy the downloaded files into that folder.
-
-Reload Obsidian.
-
-Enable Nudge in Settings → Community plugins.
+```
+* Copy the downloaded files into that folder.
+* Reload Obsidian.
+*Enable Nudge in Settings → Community plugins.
 
 Development
 Requirements:
 
 Node.js 18 or newer
+```
 npm
+```
 Install dependencies:
+```
 npm install
+```
+Run the development build in watch mode:
+```
+npm run dev
+```
+Create a productive build
+```
+npm run build
+```
+Run ESLint
+```
+npm run lint
+```
+The compiled plugin entry point is main.js.
+### Privacy
+Nudge operates locally inside your Obsidian vault. It does not require an account, cloud service, telemetry, or external network requests.
+
+### Inspiration
+
+Nudge was inspired by the calendar and activity visualization concepts of Heatmap Calendar by Richardsl. The project served as inspiration for Nudge's completion activity heatmap and helped shape some of its visual ideas. Nudge is an independent project and is not affiliated with or endorsed by the Heatmap Calendar project. 
+
+<b> A little heads-up: </b> This is my first Obsidian plugin, so expect a few bugs along the way! 🐛
+If you run into something that doesn't seem right, feel free to open an issue and let me know. Cheers!
