@@ -71,7 +71,7 @@ export class NudgeView extends ItemView {
       attr: { "aria-label": "Refresh" },
     });
     setIcon(refresh, "refresh-cw");
-    refresh.addEventListener("click", () => this.refresh());
+    refresh.addEventListener("click", () => { void this.refresh(); });
   }
 
   // ---------- add form ----------
@@ -137,9 +137,9 @@ export class NudgeView extends ItemView {
       this.contentEl.querySelector<HTMLInputElement>(".nudge-add-title")?.focus();
     };
 
-    addBtn.addEventListener("click", submit);
+    addBtn.addEventListener("click", () => { void submit(); });
     title.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") submit();
+      if (e.key === "Enter") void submit();
     });
   }
 
@@ -191,7 +191,7 @@ export class NudgeView extends ItemView {
       if (name === "Completed") {
         groupName.addClass("is-clickable");
         groupName.setAttr("title", "Open completed tasks");
-        groupName.addEventListener("click", () => this.openCompleted());
+        groupName.addEventListener("click", () => { void this.openCompleted(); });
       }
       head.createSpan({ cls: "nudge-count", text: String(list.length) });
 
@@ -212,15 +212,17 @@ export class NudgeView extends ItemView {
           attr: { "aria-label": "Delete all completed tasks" },
         });
         setIcon(trash, "trash-2");
-        trash.addEventListener("click", async () => {
-          const confirmed = window.confirm(
-            `Delete ${list.length} completed ${list.length === 1 ? "task" : "tasks"} from their notes? This cannot be undone.`,
-          );
-          if (!confirmed) return;
+        trash.addEventListener("click", () => {
+          void (async () => {
+            const confirmed = window.confirm(
+              `Delete ${list.length} completed ${list.length === 1 ? "task" : "tasks"} from their notes? This cannot be undone.`,
+            );
+            if (!confirmed) return;
 
-          const removed = await this.trashCompleted();
-          new Notice(`Nudge: deleted ${removed} completed ${removed === 1 ? "task" : "tasks"}.`);
-          await this.refresh();
+            const removed = await this.trashCompleted();
+            new Notice(`Nudge: deleted ${removed} completed ${removed === 1 ? "task" : "tasks"}.`);
+            await this.refresh();
+          })();
         });
 
         if (!this.completedExpanded) continue;
@@ -244,7 +246,7 @@ export class NudgeView extends ItemView {
             e.stopPropagation();        // don't also open the note
             check.disabled = true;
             row.addClass("is-completing");
-            window.setTimeout(() => this.completeItem(item), 260); // let the animation play
+            window.setTimeout(() => { void this.completeItem(item); }, 260); // let the animation play
           });
         }
 
@@ -254,7 +256,7 @@ export class NudgeView extends ItemView {
         if (name === "Overdue") chip.addClass("is-overdue");
         if (name === "Today") chip.addClass("is-today");
 
-        row.addEventListener("click", () => this.openItem(item));
+        row.addEventListener("click", () => { void this.openItem(item); });
       }
     }
 

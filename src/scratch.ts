@@ -9,4 +9,6 @@ const samples = [
 "- [ ] No date",
 ];
 
-samples.forEach((s, i) => console.log(parseLine(s, "test.md", i)));
+for (const [i, sample] of samples.entries()) {
+  parseLine(sample, "test.md", i);
+}
