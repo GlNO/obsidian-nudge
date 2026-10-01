@@ -54,8 +54,6 @@ Existing inbox tasks are migrated to this table format automatically when requir
 5. Select the plus button or press Enter.
 6. Tasks from other Markdown notes are included automatically when they use the supported checklist syntax.
 
-Tasks from other Markdown notes are included automatically when they use the supported checklist syntax.
-
 ## Commands
 Open Nudge agenda: Open the Nudge agenda view.
 Scan vault for agenda items: Scan the vault and log the number of recognized tasks.
