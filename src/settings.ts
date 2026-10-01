@@ -4,6 +4,7 @@ export interface NudgeSettings {
   remindersEnabled: boolean;
   leadMinutes: number;
   allDayTime: string;
+  timeFormat: "12-hour" | "24-hour";
   inboxPath: string;               
   fired: Record<string, string>;
   completionHistory: Record<string, number>;
@@ -13,6 +14,7 @@ export const DEFAULT_SETTINGS: NudgeSettings = {
   remindersEnabled: true,
   leadMinutes: 10,
   allDayTime: "09:00",
+  timeFormat: "24-hour",
   inboxPath: "Nudge_Inbox.md",
   fired: {},
   completionHistory: {},
@@ -22,6 +24,7 @@ export const DEFAULT_SETTINGS: NudgeSettings = {
 export interface SettingsHost extends Plugin {
   settings: NudgeSettings;
   saveSettings(): Promise<void>;
+  refreshOpenViews(): void;
 }
 
 export class NudgeSettingTab extends PluginSettingTab {
@@ -63,6 +66,22 @@ export class NudgeSettingTab extends PluginSettingTab {
           this.host.settings.allDayTime = v;
           await this.host.saveSettings();
         })
+      );
+
+    new Setting(containerEl)
+      .setName("Time format")
+      .setDesc("Choose how times are displayed in the agenda.")
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOption("24-hour", "24-hour")
+          .addOption("12-hour", "12-hour (AM/PM)")
+          .setValue(this.host.settings.timeFormat)
+          .onChange(async (value) => {
+            if (value !== "12-hour" && value !== "24-hour") return;
+            this.host.settings.timeFormat = value;
+            await this.host.saveSettings();
+            this.host.refreshOpenViews();
+          })
       );
 
       new Setting(containerEl)

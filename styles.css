@@ -183,7 +183,7 @@
 
 .nudge-view .nudge-time-control {
   flex: 0 0 auto;
-  min-width: 82px;
+  min-width: 96px;
   justify-self: start;
 }
 
@@ -213,8 +213,8 @@
 
 .nudge-view .nudge-time-control .nudge-chip-input {
   flex: 0 0 auto;
-  width: 72px;
-  min-width: 72px;
+  width: 82px;
+  min-width: 82px;
   padding: 0 2px;
 }
 

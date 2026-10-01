@@ -20,7 +20,8 @@ export class NudgeView extends ItemView {
     private trashCompleted: () => Promise<number>,
     private openCompleted: () => Promise<void>,
     private complete: (item: AgendaItem) => Promise<void>,
-    private getCompletionHistory: () => Record<string, number>
+    private getCompletionHistory: () => Record<string, number>,
+    private getTimeFormat: () => "12-hour" | "24-hour"
   ) {
     super(leaf);
   }
@@ -110,7 +111,11 @@ export class NudgeView extends ItemView {
     const time = timeControl.createEl("input", {
       type: "time",
       cls: "nudge-chip-input",
-      attr: { step: "300", "aria-label": "Due time" },
+      attr: {
+        step: "300",
+        "aria-label": "Due time",
+        lang: this.getTimeFormat() === "12-hour" ? "en-US" : "en-GB",
+      },
     });
     time.value = this.draft.time;
     time.addEventListener("input", () => (this.draft.time = time.value));
@@ -167,17 +172,20 @@ export class NudgeView extends ItemView {
     ];
 
     const chipFor = (name: string, item: AgendaItem): string => {
+      const displayTime = item.time
+        ? moment(item.time, "HH:mm", true).format(this.getTimeFormat() === "12-hour" ? "h:mm A" : "HH:mm")
+        : undefined;
       if (name === "Overdue") {
         const late = moment(today, FMT).diff(moment(item.date, FMT), "days");
         return `${late}d late`;
       }
-      if (name === "Today" || name === "Tomorrow") return item.time ?? "All day";
+      if (name === "Today" || name === "Tomorrow") return displayTime ?? "All day";
       if (name === "Completed") {
         return item.completedOn
           ? `Done ${moment(item.completedOn, FMT).format(DISPLAY_DATE_FMT)}`
           : "Completed";
       }
-      return moment(item.date, FMT).format(DISPLAY_DATE_FMT) + (item.time ? ` · ${item.time}` : "");
+      return moment(item.date, FMT).format(DISPLAY_DATE_FMT) + (displayTime ? ` · ${displayTime}` : "");
     };
 
     let shown = 0;
