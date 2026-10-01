@@ -1,92 +1,97 @@
-# Obsidian Sample Plugin
+# Nudge
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Nudge is a focused task agenda for Obsidian. It collects dated tasks from your vault, organizes them by urgency, provides reminders, and stores everything locally in Markdown.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Features
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
+- Dedicated agenda view for overdue, today's, tomorrow's, upcoming, and completed tasks
+- Add tasks directly from the Nudge view
+- Scan all Markdown notes in your vault
+- Support for timed and all-day tasks
+- Optional desktop notifications for upcoming tasks
+- Mark tasks as completed from the agenda
+- Completion activity heatmap
+- Open tasks in their source note
+- Live updates when notes change
+- Configurable inbox note and reminder timing
+- Local-only storage with no external services
 
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and outputs a Notice on click.
-- Registers a global interval which logs 'setInterval' to the console.
+## Task syntax
 
-## First time developing plugins?
+Nudge recognizes Markdown checklist items containing a due-date token:
 
-Quick starting guide for new plugin devs:
+```markdown
+- [ ] Review project notes @2026-10-05
+- [ ] Team meeting @2026-10-06 14:30
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `src/main.ts` to `main.js`.
-- Make changes to `src/main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+A task may also be marked complete with a completion date:
+- [x] Review project notes @2026-10-05 done:2026-10-04
 
-## Releasing new releases
+Inbox format
+Tasks created from the Nudge agenda are saved in the configured inbox note as a Markdown table:
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+# Tasks
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+| Task | Due | Time | Completed |
+| --- | --- | --- | --- |
+| Review project notes | 2026-10-05 |  |  |
+| Team meeting | 2026-10-06 | 14:30 |  |
 
-## Adding your plugin to the community plugin list
+Completed tasks are moved to a separate Completed section.
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+Existing inbox tasks are migrated to this table format automatically when required.
 
-## How to use
+Getting started
+Install and enable Nudge.
+Open the command palette and run Open Nudge agenda, or click the Nudge calendar icon in the ribbon.
+Enter a task title.
+Select a due date and optional time.
+Select the plus button or press Enter.
+Tasks from other Markdown notes are included automatically when they use the supported checklist syntax.
 
-- Clone this repo.
-- Make sure your NodeJS is at least v18 (`node --version`).
-- `npm i` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+Tasks from other Markdown notes are included automatically when they use the supported checklist syntax.
 
-## Manually installing the plugin
+Commands
+Open Nudge agenda: Open the Nudge agenda view.
+Scan vault for agenda items: Scan the vault and log the number of recognized tasks.
+Settings
+Nudge provides the following settings:
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+Enable reminders: Enable or disable task reminders.
+Lead time (minutes): How long before a timed task to show its reminder.
+All-day reminder time: The time used for tasks without a specific time.
+Inbox note: The Markdown note where tasks added from the agenda are saved.
+The default inbox note is Nudge_Inbox.md.
 
-## Improve code quality with eslint
+Completing tasks
+Select the check button beside an active task to complete it.
 
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code.
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+Tasks from other notes are copied to the inbox's completed section and removed from their original location. Tasks already stored in the inbox are moved to its completed section.
 
-## Funding URL
+Completed tasks can be expanded from the agenda. The trash button permanently removes completed tasks from their notes.
 
-You can include funding URLs where people who use your plugin can financially support it.
+Installation
+Community plugins
+Open Settings → Community plugins.
+Search for Nudge.
+Install and enable the plugin.
+Manual installation
+Download main.js, manifest.json, and styles.css from the latest release.
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+Create this folder in your vault:
 
-```json
-{
-	"fundingUrl": "https://buymeacoffee.com"
-}
-```
+.obsidian/plugins/obsidian-nudge/
 
-If you have multiple URLs, you can also do:
+Copy the downloaded files into that folder.
 
-```json
-{
-	"fundingUrl": {
-		"Buy Me a Coffee": "https://buymeacoffee.com",
-		"GitHub Sponsor": "https://github.com/sponsors",
-		"Patreon": "https://www.patreon.com/"
-	}
-}
-```
+Reload Obsidian.
 
-## API Documentation
+Enable Nudge in Settings → Community plugins.
 
-See https://docs.obsidian.md
+Development
+Requirements:
+
+Node.js 18 or newer
+npm
+Install dependencies:
+npm install
