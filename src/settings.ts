@@ -2,16 +2,20 @@ import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
 
 export interface NudgeSettings {
   remindersEnabled: boolean;
-  leadMinutes: number;            // how early to remind for timed tasks
-  allDayTime: string;             // "HH:mm", when to remind for tasks with no time
-  fired: Record<string, string>;  // reminder key -> due date (so we never repeat)
+  leadMinutes: number;
+  allDayTime: string;
+  inboxPath: string;               
+  fired: Record<string, string>;
+  completionHistory: Record<string, number>;
 }
 
 export const DEFAULT_SETTINGS: NudgeSettings = {
   remindersEnabled: true,
   leadMinutes: 10,
   allDayTime: "09:00",
+  inboxPath: "Nudge_Inbox.md",
   fired: {},
+  completionHistory: {},
 };
 
 // lets the tab talk to your plugin without importing main.ts
@@ -60,5 +64,18 @@ export class NudgeSettingTab extends PluginSettingTab {
           await this.host.saveSettings();
         })
       );
+
+      new Setting(containerEl)
+  .setName("Inbox note")
+  .setDesc("Where tasks added from the sidebar are saved. Created if it doesn't exist.")
+  .addText((t) =>
+    t.setValue(this.host.settings.inboxPath).onChange(async (v) => {
+      const p = v.trim();
+      if (!p) return;
+      this.host.settings.inboxPath = p.endsWith(".md") ? p : `${p}.md`;
+      await this.host.saveSettings();
+    })
+  );
+
   }
 }

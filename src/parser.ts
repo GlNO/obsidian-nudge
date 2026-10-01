@@ -1,6 +1,7 @@
 import { AgendaItem } from "./types";
 
 const TASK_RE = /^\s*[-*]\s+\[( |x|X)\]\s+(.*)$/;
+const TABLE_RE = /^\s*\|\s*(.*?)\s*\|\s*(\d{4}-\d{1,2}-\d{1,2})\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*$/;
 const DUE_RE  = /(?:^|\s)@(\d{4}-\d{1,2}-\d{1,2})(?:\s+(\d{1,2}:\d{2}))?/;
 const DONE_RE = /(?:^|\s)done:(\d{4}-\d{1,2}-\d{1,2})/;
 
@@ -36,10 +37,31 @@ export function parseLine(
   filePath: string,
   line: number
 ): AgendaItem | null {
+  const table = TABLE_RE.exec(text);
+  if (table) {
+    const title = table[1].trim();
+    const date = normalizeDate(table[2]);
+    if (!title || !isValidDate(date) || /^[-:]+$/.test(title)) return null;
+
+    const time = table[3].trim() || undefined;
+    const completedOn = table[4].trim() || undefined;
+    return {
+      id: `${filePath}:${line}`,
+      type: "task",
+      title,
+      date,
+      time,
+      done: completedOn !== undefined,
+      completedOn,
+      filePath,
+      line,
+    };
+  }
+
   const task = TASK_RE.exec(text);
   if (!task) return null;
 
-  const done = task[1].toLowerCase() === "x";
+  
   const body = task[2];
 
   const due = DUE_RE.exec(body);
@@ -53,9 +75,11 @@ export function parseLine(
   const completed = DONE_RE.exec(body);
   const completedOn = completed ? normalizeDate(completed[1]) : undefined;
 
+  const done = task[1].toLowerCase() === "x" || completedOn !== undefined;
+
   const title = body
     .replace(DUE_RE, "")
-    .replace(DONE_RE, "")
+    .replace(new RegExp(DONE_RE.source, "g"), "")
     .replace(/\s+/g, " ")
     .trim();
 

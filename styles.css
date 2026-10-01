@@ -1,75 +1,610 @@
-/* Nudge plugin styles */
+/* ============ Nudge ============ */
 
-/* tab bar */
-.nudge-view .nudge-tabs {
+.nudge-view {
+  --nudge-radius: 6px;
+  --nudge-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --nudge-dur: 180ms;
+  --nudge-weekday-width: 23px;
+  --nudge-calendar-gap: 5px;
+  --nudge-cell-gap: 3px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+/* ---------- top bar ---------- */
+
+.nudge-view .nudge-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+}
+
+.nudge-view .nudge-view-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  font-weight: 600;
+}
+
+.nudge-view .nudge-view-title-icon {
+  display: flex;
+}
+
+.nudge-view .nudge-view-title-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.nudge-view .nudge-icon-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--nudge-dur) var(--nudge-ease),
+    color var(--nudge-dur) var(--nudge-ease);
+}
+
+.nudge-view .nudge-icon-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.nudge-view .nudge-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* tab-switch animation */
+@keyframes nudge-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.nudge-view .nudge-body.is-entering {
+  animation: nudge-enter 220ms var(--nudge-ease);
+}
+
+.nudge-view .nudge-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Agenda and activity share one view. */
+.nudge-view .nudge-dashboard {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.nudge-view .nudge-agenda-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.nudge-view .nudge-activity-panel {
+  flex: none;
+  min-width: 0;
+}
+
+/* ---------- quick add ---------- */
+
+.nudge-view .nudge-add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--nudge-radius);
+  transition: border-color var(--nudge-dur) var(--nudge-ease),
+    box-shadow var(--nudge-dur) var(--nudge-ease);
+}
+
+.nudge-view .nudge-add:focus-within {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--interactive-accent) 18%, transparent);
+}
+
+.nudge-view .nudge-add .nudge-add-title,
+.nudge-view .nudge-add .nudge-add-title:focus {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-size: clamp(11px, 4cqi, var(--font-ui-medium));
+}
+
+.nudge-view .nudge-add-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nudge-view .nudge-add-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.nudge-view .nudge-date-control,
+.nudge-view .nudge-time-control {
   display: flex;
   align-items: center;
   gap: 4px;
-  border-bottom: 1px solid var(--background-modifier-border);
-  margin-bottom: 8px;
+  min-height: 30px;
+  padding: 2px 4px 2px 8px;
+  background: var(--background-modifier-hover);
+  border: 1px solid transparent;
+  border-radius: 4px;
 }
 
-.nudge-view .nudge-tab {
+.nudge-view .nudge-date-control:focus-within,
+.nudge-view .nudge-time-control:focus-within {
+  border-color: var(--interactive-accent);
+}
+
+.nudge-view .nudge-date-control {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.nudge-view .nudge-time-control {
+  justify-self: start;
+}
+
+.nudge-view .nudge-control-label {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.nudge-view .nudge-chip-input {
+  width: auto;
+  min-width: 0;
+  height: 26px;
+  padding: 0 10px;
   background: transparent;
-  box-shadow: none;
   border: none;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.nudge-view .nudge-date-control .nudge-chip-input {
+  flex: 1;
+  width: 96px;
+  padding: 0 2px;
+}
+
+.nudge-view .nudge-time-control .nudge-chip-input {
+  width: 58px;
+  padding: 0 2px;
+}
+
+.nudge-view .nudge-add-btn {
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 8px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  box-shadow: none;
+  border-radius: 4px;
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--nudge-dur) var(--nudge-ease),
+    transform 120ms var(--nudge-ease);
+}
+
+.nudge-view .nudge-add-btn:hover {
+  background: var(--interactive-accent-hover);
+}
+
+.nudge-view .nudge-add-btn:active {
+  transform: scale(0.95);
+}
+
+.nudge-view .nudge-add-icon {
+  display: flex;
+}
+
+.nudge-view .nudge-add-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---------- agenda groups ---------- */
+
+.nudge-view .nudge-group {
+  margin-bottom: 14px;
+}
+
+.nudge-view .nudge-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px 2px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nudge-view .nudge-group-title .is-clickable {
+  cursor: pointer;
+}
+
+.nudge-view .nudge-group-title .is-clickable:hover {
+  text-decoration: underline;
+}
+
+.nudge-view .nudge-group.is-overdue .nudge-group-title {
+  color: var(--text-error);
+}
+
+.nudge-view .nudge-group.is-completed {
+  margin-top: 20px;
+}
+
+.nudge-view .nudge-group.is-completed .nudge-group-title {
+  justify-content: space-between;
+}
+
+.nudge-view .nudge-completed-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.nudge-view .nudge-completed-action {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  box-shadow: none;
   color: var(--text-muted);
   cursor: pointer;
 }
 
-.nudge-view .nudge-tab.is-active {
+.nudge-view .nudge-completed-action:hover {
+  background: var(--background-modifier-hover);
   color: var(--text-normal);
-  border-bottom-color: var(--interactive-accent);
 }
 
-.nudge-view .nudge-refresh {
-  margin-left: auto;
+.nudge-view .nudge-completed-action.is-danger:hover {
+  color: var(--text-error);
 }
 
-/* agenda rows */
+.nudge-view .nudge-completed-action svg {
+  width: 14px;
+  height: 14px;
+}
+
+.nudge-view .nudge-count {
+  padding: 0 6px;
+  background: var(--background-modifier-hover);
+  border-radius: 3px;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+/* ---------- task rows ---------- */
+
 .nudge-view .nudge-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 6px;
-  border-radius: var(--radius-s);
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background var(--nudge-dur) var(--nudge-ease),
+    opacity 240ms var(--nudge-ease),
+    transform 240ms var(--nudge-ease);
 }
 
 .nudge-view .nudge-item:hover {
   background: var(--background-modifier-hover);
 }
 
-.nudge-view .nudge-when {
-  color: var(--text-muted);
-  min-width: 5.5em;
+.nudge-view .nudge-item.is-completing {
+  opacity: 0;
+  transform: translateX(12px);
 }
 
+.nudge-view .nudge-item.is-completed {
+  opacity: 0.7;
+}
 
-/* heatmap */
-.nudge-view .nudge-heatmap-summary {
+.nudge-view .nudge-check {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1.5px solid var(--text-faint);
+  box-shadow: none;
+  border-radius: 50%;
+  color: transparent;
+  cursor: pointer;
+  transition: background var(--nudge-dur) var(--nudge-ease),
+    border-color var(--nudge-dur) var(--nudge-ease),
+    color var(--nudge-dur) var(--nudge-ease);
+}
+
+.nudge-view .nudge-check svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3;
+}
+
+.nudge-view .nudge-item:hover .nudge-check {
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+
+.nudge-view .nudge-check:hover {
+  background: color-mix(in srgb, var(--interactive-accent) 15%, transparent);
+}
+
+.nudge-view .nudge-item.is-completing .nudge-check {
+  background: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.nudge-view .nudge-check.is-done,
+.nudge-view .nudge-check.is-done:disabled {
+  background: var(--interactive-accent);
+  border-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  cursor: default;
+  opacity: 1;
+}
+
+.nudge-view .nudge-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--font-ui-small);
+  line-height: 1.35;
+  color: var(--text-normal);
+}
+
+.nudge-view .nudge-item.is-completed .nudge-title {
   color: var(--text-muted);
-  margin: 4px 0 8px;
+  text-decoration: line-through;
+}
+
+.nudge-view .nudge-chip {
+  flex: none;
+  padding: 1px 8px;
+  background: var(--background-modifier-hover);
+  border-radius: 3px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.nudge-view .nudge-chip.is-today {
+  background: color-mix(in srgb, var(--interactive-accent) 16%, transparent);
+  color: var(--interactive-accent);
+}
+
+.nudge-view .nudge-chip.is-overdue {
+  background: color-mix(in srgb, var(--text-error) 14%, transparent);
+  color: var(--text-error);
+}
+
+/* ---------- empty state ---------- */
+
+.nudge-view .nudge-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 36px 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.nudge-view .nudge-empty-icon svg {
+  width: 32px;
+  height: 32px;
+  opacity: 0.6;
+}
+
+.nudge-view .nudge-empty-title {
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.nudge-view .nudge-empty-sub {
+  font-size: var(--font-ui-small);
+}
+
+/* ---------- heatmap ---------- */
+
+.nudge-view .nudge-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.nudge-view .nudge-stat,
+.nudge-view .nudge-card {
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--nudge-radius);
+}
+
+.nudge-view .nudge-stat {
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.nudge-view .nudge-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.nudge-view .nudge-stat-label {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.nudge-view .nudge-card {
+  padding: 12px;
+  min-width: 0;
+}
+
+.nudge-view .nudge-activity-section {
+  padding-top: 14px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.nudge-view .nudge-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px 2px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.nudge-view .nudge-section-heading-icon {
+  display: flex;
+}
+
+.nudge-view .nudge-section-heading-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.nudge-view .nudge-calendar {
+  overflow: visible;
+  min-width: 0;
+}
+
+.nudge-view .nudge-months {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  width: calc(100% - var(--nudge-weekday-width) - var(--nudge-calendar-gap));
+  min-width: 0;
+  margin: 0 0 4px calc(var(--nudge-weekday-width) + var(--nudge-calendar-gap));
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1;
+}
+
+.nudge-view .nudge-months span {
+  white-space: nowrap;
+}
+
+.nudge-view .nudge-months .is-last-month {
+  justify-self: end;
+}
+
+.nudge-view .nudge-calendar-grid {
+  display: flex;
+  min-width: 0;
+  gap: var(--nudge-calendar-gap);
+}
+
+.nudge-view .nudge-weekdays {
+  flex: 0 0 var(--nudge-weekday-width);
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  gap: var(--nudge-cell-gap);
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.nudge-view .nudge-weekdays > div {
+  display: flex;
+  align-items: center;
 }
 
 .nudge-view .nudge-heatmap {
+  flex: 1;
+  min-width: 0;
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  grid-template-rows: repeat(7, auto);
-  gap: 3px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  gap: var(--nudge-cell-gap);
 }
 
 .nudge-view .nudge-cell {
+  min-width: 0;
+  min-height: 0;
   aspect-ratio: 1;
-  border-radius: 2px;
   background: var(--background-modifier-border);
+  border-radius: 1px;
+  transition: transform 120ms var(--nudge-ease);
+}
+
+.nudge-view .nudge-heatmap .nudge-cell:hover {
+  transform: scale(1.3);
 }
 
 .nudge-view .nudge-cell.is-future {
   visibility: hidden;
+}
+
+.nudge-view .nudge-cell.is-today {
+  box-shadow: 0 0 0 1.5px var(--text-muted);
 }
 
 .nudge-view .nudge-cell.level-1 { background: color-mix(in srgb, var(--interactive-accent) 30%, transparent); }
@@ -80,8 +615,9 @@
 .nudge-view .nudge-legend {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 4px;
-  margin-top: 8px;
+  margin-top: 10px;
   color: var(--text-muted);
   font-size: var(--font-ui-smaller);
 }
@@ -89,4 +625,80 @@
 .nudge-view .nudge-legend .nudge-cell {
   width: 12px;
   height: 12px;
+}
+
+/* Size against the resizable sidebar, not the application window. */
+@container (max-width: 300px) {
+  .nudge-view {
+    --nudge-weekday-width: 18px;
+    --nudge-calendar-gap: 3px;
+    --nudge-cell-gap: 2px;
+  }
+
+  .nudge-view .nudge-add,
+  .nudge-view .nudge-card {
+    padding: 8px;
+  }
+
+  .nudge-view .nudge-control-label {
+    display: none;
+  }
+
+  .nudge-view .nudge-date-control,
+  .nudge-view .nudge-time-control {
+    padding-left: 5px;
+  }
+
+  .nudge-view .nudge-months {
+    font-size: 10px;
+  }
+
+  .nudge-view .nudge-weekdays {
+    font-size: 9px;
+  }
+}
+
+@container (max-width: 210px) {
+  .nudge-view .nudge-add-row {
+    flex-wrap: wrap;
+  }
+
+  .nudge-view .nudge-date-control,
+  .nudge-view .nudge-time-control {
+    flex: 1 0 100%;
+  }
+
+  .nudge-view .nudge-months span:not(.is-last-month) {
+    font-size: 0;
+  }
+}
+
+/* ---------- editor styling (only if you added decorate.ts) ---------- */
+
+.nudge-token {
+  padding: 0 4px;
+  background: var(--code-background);
+  border-radius: var(--radius-s);
+  color: var(--code-normal);
+  font-family: var(--font-monospace);
+  font-weight: var(--bold-weight);
+}
+
+.nudge-done {
+  padding: 0 4px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  color: var(--text-faint);
+  font-size: var(--font-smallest);
+}
+
+/* ---------- accessibility ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .nudge-view *,
+  .nudge-view *::before,
+  .nudge-view *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
