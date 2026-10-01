@@ -19,7 +19,7 @@ export class NudgeView extends ItemView {
     private add: (title: string, date: string, time?: string) => Promise<void>,
     private trashCompleted: () => Promise<number>,
     private openCompleted: () => Promise<void>,
-    private complete: (item: AgendaItem) => Promise<void>,
+    private complete: (item: AgendaItem) => Promise<boolean>,
     private getCompletionHistory: () => Record<string, number>,
     private getTimeFormat: () => "12-hour" | "24-hour"
   ) {
@@ -389,7 +389,11 @@ export class NudgeView extends ItemView {
     if (!(file instanceof TFile)) return;
 
     const today = moment().format(FMT);
-    await this.complete(item);
+    const completed = await this.complete(item);
+    if (!completed) {
+      await this.refresh();
+      return;
+    }
     item.done = true;
     item.completedOn = today;
     this.items = this.items.filter((current) => current.id !== item.id);

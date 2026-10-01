@@ -183,34 +183,44 @@ export default class NudgePlugin extends Plugin {
     return `${lines.join("\n")}\n`;
   }
 
-  private async completeTask(item: AgendaItem) {
+  private async completeTask(item: AgendaItem): Promise<boolean> {
     return this.enqueueVaultWrite(async () => {
       const inboxPath = normalizePath(this.settings.inboxPath);
       const source = this.app.vault.getAbstractFileByPath(item.filePath);
-      if (!(source instanceof TFile)) return;
+      if (!(source instanceof TFile)) return false;
 
       const sourceText = await this.app.vault.cachedRead(source);
       const sourceLines = sourceText.split("\n");
-      const current = sourceLines[item.line]?.replace(/\r$/, "");
-      const parsed = current ? parseLine(current, item.filePath, item.line) : null;
-      if (!parsed || parsed.done || parsed.title !== item.title || parsed.date !== item.date) return;
+      let lineIndex = item.line;
+      let current = sourceLines[lineIndex]?.replace(/\r$/, "");
+      let parsed = current ? parseLine(current, item.filePath, lineIndex) : null;
+      if (!parsed || parsed.done || parsed.title !== item.title || parsed.date !== item.date || parsed.time !== item.time) {
+        lineIndex = sourceLines.findIndex((line, index) => {
+          const candidate = parseLine(line.replace(/\r$/, ""), item.filePath, index);
+          return candidate !== null && !candidate.done && candidate.title === item.title && candidate.date === item.date && candidate.time === item.time;
+        });
+        current = lineIndex >= 0 ? sourceLines[lineIndex]?.replace(/\r$/, "") : undefined;
+        parsed = current ? parseLine(current, item.filePath, lineIndex) : null;
+      }
+      if (!parsed || parsed.done) return false;
 
       const completedLine = `| ${item.title.replace(/\|/g, "\\|")} | ${item.date} | ${item.time ?? ""} | ${moment().format("YYYY-MM-DD")} |`;
 
       const inbox = this.app.vault.getAbstractFileByPath(inboxPath);
-      if (!(inbox instanceof TFile)) return;
+      if (!(inbox instanceof TFile)) return false;
 
       if (source.path !== inboxPath) {
         const inboxText = await this.app.vault.cachedRead(inbox);
         await this.app.vault.modify(inbox, this.appendCompletedRow(inboxText, completedLine));
-        await this.app.vault.modify(source, sourceLines.filter((_, index) => index !== item.line).join("\n"));
+        await this.app.vault.modify(source, sourceLines.filter((_, index) => index !== lineIndex).join("\n"));
       } else {
-        const activeText = sourceLines.filter((_, index) => index !== item.line).join("\n");
+        const activeText = sourceLines.filter((_, index) => index !== lineIndex).join("\n");
         await this.app.vault.modify(inbox, this.appendCompletedRow(activeText, completedLine));
       }
 
       if (source instanceof TFile && source.path !== inboxPath) await this.updateFile(source);
       if (inbox instanceof TFile) await this.updateFile(inbox);
+      return true;
     });
   }
 
