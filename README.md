@@ -111,7 +111,7 @@ Nudge provides the following settings:
 | **All-day reminder time** | The time used for tasks without a specific time.               |
 | **Inbox note**            | The Markdown note where tasks added from the agenda are saved. |
 
-The default inbox note is `Nudge_Inbox.md`.
+The default inbox note is `NudgeInbox.md`, this can also be renamed/customized to desired file.
 
 ---
 
