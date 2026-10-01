@@ -8,6 +8,7 @@ import {
   WidgetType
 } from "@codemirror/view";
 
+import {moment} from "obsidian";
 // group 1 = the whitespace before the token, group 2 = the token itself
 const TOKEN_RE =
   /(^|\s)(@\d{4}-\d{1,2}-\d{1,2}(?:\s+\d{1,2}:\d{2})?|done:\d{4}-\d{1,2}-\d{1,2})/g;

@@ -8,20 +8,26 @@ const DONE_RE = /(?:^|\s)done:(\d{4}-\d{1,2}-\d{1,2})/;
 function pad(s: string): string {
   return s.padStart(2, "0");
 }
-
-function normalizeDate(s: string): string {
-  const [y, m, d] = s.split("-");
+function normalizeDate(s: string | undefined): string {
+  if (!s) return "";
+  const parts = s.split("-");
+  const [y, m, d] = parts;
+  if (!y || !m || !d) return "";
   return `${y}-${pad(m)}-${pad(d)}`;
 }
 
-function normalizeTime(s: string): string {
+function normalizeTime(s: string | undefined): string {
+  if (!s) return "";
   const [h, m] = s.split(":");
+  if (!h || !m) return "";
   return `${pad(h)}:${m}`;
 }
 
-
-function isValidDate(s: string): boolean {
-  const [y, m, d] = s.split("-").map(Number);
+function isValidDate(s: string | undefined): boolean {
+  if (!s) return false;
+  const parts = s.split("-").map(Number);
+  if (parts.length !== 3) return false;
+  const [y, m, d] = parts;
   const dt = new Date(y, m - 1, d);
   return (
     dt.getFullYear() === y &&
@@ -31,7 +37,6 @@ function isValidDate(s: string): boolean {
 }
 
 
-
 export function parseLine(
   text: string,
   filePath: string,
@@ -39,12 +44,15 @@ export function parseLine(
 ): AgendaItem | null {
   const table = TABLE_RE.exec(text);
   if (table) {
-    const title = table[1].trim();
-    const date = normalizeDate(table[2]);
+    const title = table[1]?.trim() ?? "";
+    const dateStr = table[2]?.trim();
+    if (!dateStr) return null;
+    
+    const date = normalizeDate(dateStr);
     if (!title || !isValidDate(date) || /^[-:]+$/.test(title)) return null;
 
-    const time = table[3].trim() || undefined;
-    const completedOn = table[4].trim() || undefined;
+    const time = table[3]?.trim() || undefined;
+    const completedOn = table[4]?.trim() || undefined;
     return {
       id: `${filePath}:${line}`,
       type: "task",

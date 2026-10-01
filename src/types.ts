@@ -5,7 +5,7 @@ export interface AgendaItem {
 	id: string;
 	type: ItemType;
 	title: string;
-	data: string;
+	date: string;
 	time?: string;
 	done: boolean;
 	filePath: string;
