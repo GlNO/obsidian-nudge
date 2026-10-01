@@ -1,8 +1,92 @@
-/*
+/* Nudge plugin styles */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* tab bar */
+.nudge-view .nudge-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  margin-bottom: 8px;
+}
 
-If your plugin does not need CSS, delete this file.
+.nudge-view .nudge-tab {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+}
 
-*/
+.nudge-view .nudge-tab.is-active {
+  color: var(--text-normal);
+  border-bottom-color: var(--interactive-accent);
+}
+
+.nudge-view .nudge-refresh {
+  margin-left: auto;
+}
+
+/* agenda rows */
+.nudge-view .nudge-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+
+.nudge-view .nudge-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.nudge-view .nudge-when {
+  color: var(--text-muted);
+  min-width: 5.5em;
+}
+
+
+/* heatmap */
+.nudge-view .nudge-heatmap-summary {
+  color: var(--text-muted);
+  margin: 4px 0 8px;
+}
+
+.nudge-view .nudge-heatmap {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  grid-template-rows: repeat(7, auto);
+  gap: 3px;
+}
+
+.nudge-view .nudge-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--background-modifier-border);
+}
+
+.nudge-view .nudge-cell.is-future {
+  visibility: hidden;
+}
+
+.nudge-view .nudge-cell.level-1 { background: color-mix(in srgb, var(--interactive-accent) 30%, transparent); }
+.nudge-view .nudge-cell.level-2 { background: color-mix(in srgb, var(--interactive-accent) 50%, transparent); }
+.nudge-view .nudge-cell.level-3 { background: color-mix(in srgb, var(--interactive-accent) 75%, transparent); }
+.nudge-view .nudge-cell.level-4 { background: var(--interactive-accent); }
+
+.nudge-view .nudge-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.nudge-view .nudge-legend .nudge-cell {
+  width: 12px;
+  height: 12px;
+}

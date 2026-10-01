@@ -1,114 +1,138 @@
-import {
-	Editor,
-	MarkdownView,
-	MarkdownFileInfo,
-	Modal,
-	Notice,
-	Plugin,
-} from 'obsidian';
-import {
-	DEFAULT_SETTINGS,
-	MyPluginSettings,
-	SampleSettingTab,
-} from './settings';
+import { Notice, Plugin, debounce, moment } from "obsidian";
+import { NudgeSettings, DEFAULT_SETTINGS, NudgeSettingTab } from "./settings";
+import { AgendaItem } from "./types";
+import { parseLine } from "./parser";
+import { VIEW_TYPE_NUDGE, NudgeView } from "./view";
 
-// Remember to rename these classes and interfaces!
+export default class NudgePlugin extends Plugin {
+  settings!: NudgeSettings;
+  private lastDay = moment().format("YYYY-MM-DD");
 
-export default class MyPlugin extends Plugin {
-	settings!: MyPluginSettings;
+  async onload() {
+    await this.loadSettings();
+    this.addSettingTab(new NudgeSettingTab(this.app, this));
 
-	async onload() {
-		await this.loadSettings();
+    this.registerView(
+      VIEW_TYPE_NUDGE,
+      (leaf) => new NudgeView(leaf, () => this.scanVault())
+    );
 
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('dice', 'Sample', (_evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
+    this.addRibbonIcon("calendar-check", "Open Nudge", () => this.activateView());
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status bar text');
+    this.addCommand({
+      id: "open-nudge-view",
+      name: "Open Nudge agenda",
+      callback: () => this.activateView(),
+    });
 
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-modal-simple',
-			name: 'Open modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			},
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'replace-selected',
-			name: 'Replace selected content',
-			editorCallback: (
-				editor: Editor,
-				_ctx: MarkdownView | MarkdownFileInfo,
-			) => {
-				editor.replaceSelection('Sample editor command');
-			},
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-modal-complex',
-			name: 'Open modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView =
-					this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
+    this.addCommand({
+      id: "scan-vault",
+      name: "Scan vault for agenda items",
+      callback: async () => {
+        const items = await this.scanVault();
+        console.log(`Found ${items.length} items`, items);
+      },
+    });
 
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-				return false;
-			},
-		});
+    // live updates
+    const refreshViews = debounce(() => this.refreshOpenViews(), 1000, true);
+    this.registerEvent(this.app.metadataCache.on("changed", refreshViews));
+    this.registerEvent(this.app.vault.on("delete", refreshViews));
+    this.registerEvent(this.app.vault.on("rename", refreshViews));
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+    // reminders + midnight refresh
+    this.registerInterval(window.setInterval(() => this.tick(), 30 * 1000));
+  }
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(activeDocument, 'click', (_evt: MouseEvent) => {
-			new Notice('Click');
-		});
+  onunload() {}
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(
-			window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000),
-		);
-	}
+  async loadSettings() {
+    const data = await this.loadData();
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+    this.settings.fired = { ...(data?.fired ?? {}) };
+  }
 
-	onunload() {}
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
 
-	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<MyPluginSettings>,
-		);
-	}
+  async scanVault(): Promise<AgendaItem[]> {
+    const items: AgendaItem[] = [];
 
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
-}
+    for (const file of this.app.vault.getMarkdownFiles()) {
+      const text = await this.app.vault.cachedRead(file);
+      const lines = text.split(/\r?\n/);
 
-class SampleModal extends Modal {
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.setText('Woah!');
-	}
+      lines.forEach((lineText, index) => {
+        const item = parseLine(lineText, file.path, index);
+        if (item) items.push(item);
+      });
+    }
 
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
+    return items;
+  }
+
+  async activateView() {
+    const { workspace } = this.app;
+    let leaf = workspace.getLeavesOfType(VIEW_TYPE_NUDGE)[0];
+
+    if (!leaf) {
+      leaf = workspace.getRightLeaf(false)!;
+      await leaf.setViewState({ type: VIEW_TYPE_NUDGE, active: true });
+    }
+    workspace.revealLeaf(leaf);
+  }
+
+  refreshOpenViews() {
+    this.app.workspace.getLeavesOfType(VIEW_TYPE_NUDGE).forEach((leaf) => {
+      if (leaf.view instanceof NudgeView) leaf.view.refresh();
+    });
+  }
+
+  async tick() {
+    const day = moment().format("YYYY-MM-DD");
+    if (day !== this.lastDay) {
+      this.lastDay = day;
+      this.refreshOpenViews();
+    }
+    await this.checkReminders();
+  }
+
+  async checkReminders() {
+    const s = this.settings;
+    if (!s.remindersEnabled) return;
+
+    const now = moment();
+    const items = await this.scanVault();
+    let changed = false;
+
+    for (const item of items) {
+      if (item.done) continue;
+
+      const hasTime = !!item.time;
+      const due = moment(`${item.date} ${item.time ?? s.allDayTime}`, "YYYY-MM-DD HH:mm");
+      const remindAt = hasTime ? due.clone().subtract(s.leadMinutes, "minutes") : due.clone();
+      const windowEnd = hasTime ? due.clone().add(60, "minutes") : due.clone().endOf("day");
+
+      if (now.isBefore(remindAt) || now.isAfter(windowEnd)) continue;
+
+      const key = `${item.filePath}|${item.title}|${item.date}|${item.time ?? ""}`;
+      if (s.fired[key]) continue;
+
+      new Notice(`Nudge: ${item.title}${hasTime ? ` (${item.time})` : ""}`, 10000);
+      s.fired[key] = item.date;
+      changed = true;
+    }
+
+    // forget entries older than a week
+    const cutoff = moment().subtract(7, "days").format("YYYY-MM-DD");
+    for (const [k, date] of Object.entries(s.fired)) {
+      if (date < cutoff) {
+        delete s.fired[k];
+        changed = true;
+      }
+    }
+
+    if (changed) await this.saveSettings();
+  }
 }
