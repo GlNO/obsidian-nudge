@@ -344,7 +344,6 @@
   gap: 10px;
   padding: 7px 8px;
   border-radius: 4px;
-  cursor: pointer;
   transition: background var(--nudge-dur) var(--nudge-ease),
     opacity 240ms var(--nudge-ease),
     transform 240ms var(--nudge-ease);
