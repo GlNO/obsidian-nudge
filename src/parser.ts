@@ -25,14 +25,19 @@ function normalizeTime(s: string | undefined): string {
 
 function isValidDate(s: string | undefined): boolean {
   if (!s) return false;
-  const parts = s.split("-").map(Number);
-  if (parts.length !== 3) return false;
+  const parts = s.split("-");
   const [y, m, d] = parts;
-  const dt = new Date(y, m - 1, d);
+
+  if (!y || !m || !d) return false;  
+  const nums = parts.map(Number);
+  if (nums.length !== 3 || nums.some(isNaN)) return false;
+  const [yNum, mNum, dNum] = nums;
+  if (yNum === undefined || mNum === undefined || dNum === undefined) return false;
+  const dt = new Date(yNum, mNum - 1, dNum);
   return (
-    dt.getFullYear() === y &&
-    dt.getMonth() === m - 1 &&
-    dt.getDate() === d
+    dt.getFullYear() === yNum &&
+    dt.getMonth() === mNum - 1 &&
+    dt.getDate() === dNum
   );
 }
 
@@ -69,11 +74,12 @@ export function parseLine(
   const task = TASK_RE.exec(text);
   if (!task) return null;
 
-  
   const body = task[2];
+  if (body === undefined) return null;
+
 
   const due = DUE_RE.exec(body);
-  if (!due) return null;
+  if (!due || !due[1]) return null; 
 
   const date = normalizeDate(due[1]);
   if (!isValidDate(date)) return null;
@@ -81,9 +87,9 @@ export function parseLine(
   const time = due[2] ? normalizeTime(due[2]) : undefined;
 
   const completed = DONE_RE.exec(body);
-  const completedOn = completed ? normalizeDate(completed[1]) : undefined;
+  const completedOn = completed && completed[1] ? normalizeDate(completed[1]) : undefined; 
 
-  const done = task[1].toLowerCase() === "x" || completedOn !== undefined;
+  const done = task[1]?.toLowerCase?.() === "x" || completedOn !== undefined; 
 
   const title = body
     .replace(DUE_RE, "")

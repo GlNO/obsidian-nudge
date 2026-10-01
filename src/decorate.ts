@@ -39,7 +39,11 @@ function build(view: EditorView): DecorationSet {
 
       TOKEN_RE.lastIndex = 0;
       let m: RegExpExecArray | null;
+
+
+
       while ((m = TOKEN_RE.exec(line.text)) !== null) {
+  if (!m[1] || !m[2]) continue;  // Add safety check
   const start = line.from + m.index + m[1].length;
   const end = start + m[2].length;
 
