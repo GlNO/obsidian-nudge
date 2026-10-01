@@ -20,7 +20,6 @@
   * Completed tasks
 * ➕ Add tasks directly from the Nudge view
 * 🔎 Scan all Markdown notes in your vault
-* 🕐 Support for timed and all-day tasks
 * ✅ Mark tasks as completed from the agenda
 * 🔥 Completion activity heatmap
 * 📖 Open tasks in their source note
@@ -211,16 +210,5 @@ The project served as inspiration for Nudge's completion activity heatmap and he
 
 Nudge is an independent project and is not affiliated with or endorsed by the Heatmap Calendar project.
 
----
-
-## 🐛 Feedback
-
-This is my first Obsidian plugin, so expect a few bugs along the way!
-
-If you run into something that doesn't seem right, feel free to open an issue and let me know.
-
-Cheers! 🐛
-
----
 
 
