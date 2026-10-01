@@ -43,10 +43,7 @@ export default class NudgePlugin extends Plugin {
     this.addCommand({
       id: "scan-vault",
       name: "Scan vault for agenda items",
-      callback: async () => {
-        const items = await this.scanVault();
-        console.log(`Found ${items.length} items`, items);
-      },
+      callback: () => { void this.scanVault(); },
     });
 
     // live updates: keep the cache current, then redraw open views
@@ -78,19 +75,18 @@ export default class NudgePlugin extends Plugin {
     );
 
     // warm the cache after Obsidian finishes loading
-    this.app.workspace.onLayoutReady(async () => {
-      await this.buildCache();
-      this.refreshOpenViews();
+    this.app.workspace.onLayoutReady(() => {
+      void this.buildCache().then(() => this.refreshOpenViews());
     });
 
     // reminders + midnight refresh
-    this.registerInterval(window.setInterval(() => this.tick(), 30 * 1000));
+    this.registerInterval(window.setInterval(() => { void this.tick(); }, 30 * 1000));
   }
 
   onunload() {}
 
   async loadSettings() {
-    const data = await this.loadData();
+    const data = (await this.loadData()) as Partial<NudgeSettings> | null;
     this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
     this.settings.fired = { ...(data?.fired ?? {}) };
     this.settings.completionHistory = { ...(data?.completionHistory ?? {}) };
@@ -306,12 +302,12 @@ export default class NudgePlugin extends Plugin {
       leaf = workspace.getRightLeaf(false)!;
       await leaf.setViewState({ type: VIEW_TYPE_NUDGE, active: true });
     }
-    workspace.revealLeaf(leaf);
+    await workspace.revealLeaf(leaf);
   }
 
   refreshOpenViews() {
     this.app.workspace.getLeavesOfType(VIEW_TYPE_NUDGE).forEach((leaf) => {
-      if (leaf.view instanceof NudgeView) leaf.view.refresh();
+      if (leaf.view instanceof NudgeView) void leaf.view.refresh();
     });
   }
 
